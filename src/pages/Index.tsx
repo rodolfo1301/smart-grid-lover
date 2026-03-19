@@ -93,10 +93,10 @@ const Index = () => {
         <div>
           <h2 className="text-sm font-medium text-muted-foreground mb-4">Meine Geräte</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <DeviceCard name="PV-Anlage" icon={<Sun className="w-5 h-5" />} status="Produziert aktiv" power="3.8 kW" isActive delay={0.1} />
-            <DeviceCard name="Heimspeicher" icon={<Battery className="w-5 h-5" />} status="Laden · 92%" power="10.4 kWh" isActive delay={0.2} />
-            <DeviceCard name="E-Auto" icon={<Car className="w-5 h-5" />} status="Verbunden · 67%" power="45 kWh" isActive={false} delay={0.3} />
-            <DeviceCard name="Wärmepumpe" icon={<Thermometer className="w-5 h-5" />} status="Heizen · 22°C" power="2.1 kW" isActive delay={0.4} />
+            <DeviceCard name="PV-Anlage" icon={<Sun className="w-5 h-5" />} status="Produziert aktiv" power="3.8 kW" isActive delay={0.1} deviceId="pv" />
+            <DeviceCard name="Heimspeicher" icon={<Battery className="w-5 h-5" />} status="Laden · 92%" power="10.4 kWh" isActive delay={0.2} deviceId="battery" />
+            <DeviceCard name="E-Auto" icon={<Car className="w-5 h-5" />} status="Verbunden · 67%" power="45 kWh" isActive={false} delay={0.3} deviceId="ev" />
+            <DeviceCard name="Wärmepumpe" icon={<Thermometer className="w-5 h-5" />} status="Heizen · 22°C" power="2.1 kW" isActive delay={0.4} deviceId="heatpump" />
           </div>
         </div>
       </main>
