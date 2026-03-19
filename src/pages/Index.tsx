@@ -5,11 +5,14 @@ import PriceChart from "@/components/PriceChart";
 import DeviceCard from "@/components/DeviceCard";
 import SmartRecommendations from "@/components/SmartRecommendations";
 import EnergyFlowDiagram from "@/components/EnergyFlowDiagram";
+import { useMarketPrices, getCurrentPrice } from "@/hooks/useMarketPrices";
 
 const Index = () => {
+  const { data: prices } = useMarketPrices();
+  const current = prices ? getCurrentPrice(prices) : undefined;
+
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
       <header className="border-b border-border px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -33,7 +36,6 @@ const Index = () => {
       </header>
 
       <main className="max-w-7xl mx-auto px-6 py-6 space-y-6">
-        {/* Overview Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <EnergyOverviewCard
             title="PV-Erzeugung"
@@ -63,18 +65,24 @@ const Index = () => {
           />
           <EnergyOverviewCard
             title="Strompreis"
-            value="8.2"
+            value={current ? current.price.toFixed(1) : "—"}
             unit="ct/kWh"
             icon={<TrendingDown className="w-4 h-4 text-muted-foreground" />}
-            trend="Unter Durchschnitt"
-            trendPositive
+            trend={
+              current
+                ? current.recommendation === "laden"
+                  ? "⚡ Günstig – jetzt laden"
+                  : current.recommendation === "einspeisen"
+                  ? "💰 Teuer – einspeisen"
+                  : "— Neutral"
+                : "Lade..."
+            }
+            trendPositive={current?.recommendation === "laden"}
           />
         </div>
 
-        {/* Energy Flow */}
         <EnergyFlowDiagram />
 
-        {/* Charts & Recommendations */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
             <PriceChart />
@@ -82,42 +90,13 @@ const Index = () => {
           <SmartRecommendations />
         </div>
 
-        {/* Devices */}
         <div>
           <h2 className="text-sm font-medium text-muted-foreground mb-4">Meine Geräte</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <DeviceCard
-              name="PV-Anlage"
-              icon={<Sun className="w-5 h-5" />}
-              status="Produziert aktiv"
-              power="3.8 kW"
-              isActive
-              delay={0.1}
-            />
-            <DeviceCard
-              name="Heimspeicher"
-              icon={<Battery className="w-5 h-5" />}
-              status="Laden · 92%"
-              power="10.4 kWh"
-              isActive
-              delay={0.2}
-            />
-            <DeviceCard
-              name="E-Auto"
-              icon={<Car className="w-5 h-5" />}
-              status="Verbunden · 67%"
-              power="45 kWh"
-              isActive={false}
-              delay={0.3}
-            />
-            <DeviceCard
-              name="Wärmepumpe"
-              icon={<Thermometer className="w-5 h-5" />}
-              status="Heizen · 22°C"
-              power="2.1 kW"
-              isActive
-              delay={0.4}
-            />
+            <DeviceCard name="PV-Anlage" icon={<Sun className="w-5 h-5" />} status="Produziert aktiv" power="3.8 kW" isActive delay={0.1} />
+            <DeviceCard name="Heimspeicher" icon={<Battery className="w-5 h-5" />} status="Laden · 92%" power="10.4 kWh" isActive delay={0.2} />
+            <DeviceCard name="E-Auto" icon={<Car className="w-5 h-5" />} status="Verbunden · 67%" power="45 kWh" isActive={false} delay={0.3} />
+            <DeviceCard name="Wärmepumpe" icon={<Thermometer className="w-5 h-5" />} status="Heizen · 22°C" power="2.1 kW" isActive delay={0.4} />
           </div>
         </div>
       </main>
