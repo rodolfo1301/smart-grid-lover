@@ -5,6 +5,8 @@ import PriceChart from "@/components/PriceChart";
 import DeviceCard from "@/components/DeviceCard";
 import SmartRecommendations from "@/components/SmartRecommendations";
 import EnergyFlowDiagram from "@/components/EnergyFlowDiagram";
+import HistoryChart from "@/components/HistoryChart";
+import ThemeToggle from "@/components/ThemeToggle";
 import { useMarketPrices, getCurrentPrice } from "@/hooks/useMarketPrices";
 
 const Index = () => {
@@ -20,17 +22,22 @@ const Index = () => {
               <Zap className="w-5 h-5 text-primary-foreground" />
             </div>
             <div>
-              <h1 className="text-lg font-bold text-foreground">EnergyFlow</h1>
+              <h1 className="text-lg font-bold text-foreground tracking-tight">
+                <span className="text-gradient-energy">WATTLY</span>
+              </h1>
               <p className="text-xs text-muted-foreground">Smart Energy Dashboard</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-muted-foreground">Live</span>
-            <motion.span
-              animate={{ opacity: [1, 0.3, 1] }}
-              transition={{ duration: 2, repeat: Infinity }}
-              className="w-2 h-2 rounded-full bg-success"
-            />
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground">Live</span>
+              <motion.span
+                animate={{ opacity: [1, 0.3, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
+                className="w-2 h-2 rounded-full bg-success"
+              />
+            </div>
           </div>
         </div>
       </header>
@@ -94,11 +101,13 @@ const Index = () => {
           <h2 className="text-sm font-medium text-muted-foreground mb-4">Meine Geräte</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <DeviceCard name="PV-Anlage" icon={<Sun className="w-5 h-5" />} status="Produziert aktiv" power="3.8 kW" isActive delay={0.1} deviceId="pv" />
-            <DeviceCard name="Heimspeicher" icon={<Battery className="w-5 h-5" />} status="Laden · 92%" power="10.4 kWh" isActive delay={0.2} deviceId="battery" />
-            <DeviceCard name="E-Auto" icon={<Car className="w-5 h-5" />} status="Verbunden · 67%" power="45 kWh" isActive={false} delay={0.3} deviceId="ev" />
+            <DeviceCard name="Heimspeicher" icon={<Battery className="w-5 h-5" />} status="Laden · 92%" power="10.4 kWh" isActive delay={0.2} deviceId="battery" batteryPercent={92} />
+            <DeviceCard name="E-Auto" icon={<Car className="w-5 h-5" />} status="Verbunden · 67%" power="45 kWh" isActive={false} delay={0.3} deviceId="ev" batteryPercent={67} />
             <DeviceCard name="Wärmepumpe" icon={<Thermometer className="w-5 h-5" />} status="Heizen · 22°C" power="2.1 kW" isActive delay={0.4} deviceId="heatpump" />
           </div>
         </div>
+
+        <HistoryChart />
       </main>
     </div>
   );
