@@ -9,6 +9,9 @@ import EnergyFlowDiagram from "@/components/EnergyFlowDiagram";
 import HistoryChart from "@/components/HistoryChart";
 import ThemeToggle from "@/components/ThemeToggle";
 import PriceAlertBanner from "@/components/PriceAlertBanner";
+import SavingsCounter from "@/components/SavingsCounter";
+import AutoOptimizationToggle from "@/components/AutoOptimizationToggle";
+import GeraeteView from "@/components/GeraeteView";
 import { useMarketPrices, getCurrentPrice } from "@/hooks/useMarketPrices";
 
 type TabId = "dashboard" | "preise" | "geraete" | "verlauf";
@@ -24,6 +27,19 @@ const Index = () => {
   const { data: prices } = useMarketPrices();
   const current = prices ? getCurrentPrice(prices) : undefined;
   const [activeTab, setActiveTab] = useState<TabId>("dashboard");
+  const [autoOptimize, setAutoOptimize] = useState(true);
+
+  // Global device states
+  const [deviceStates, setDeviceStates] = useState<Record<string, boolean>>({
+    pv: true,
+    battery: true,
+    ev: false,
+    heatpump: true,
+  });
+
+  const toggleDevice = (id: string) => {
+    setDeviceStates((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -61,9 +77,19 @@ const Index = () => {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
         <AnimatePresence mode="wait">
-          {activeTab === "dashboard" && <DashboardView current={current} />}
+          {activeTab === "dashboard" && (
+            <DashboardView
+              current={current}
+              deviceStates={deviceStates}
+              toggleDevice={toggleDevice}
+              autoOptimize={autoOptimize}
+              setAutoOptimize={setAutoOptimize}
+            />
+          )}
           {activeTab === "preise" && <PreiseView />}
-          {activeTab === "geraete" && <GeraeteView />}
+          {activeTab === "geraete" && (
+            <GeraeteView deviceStates={deviceStates} toggleDevice={toggleDevice} />
+          )}
           {activeTab === "verlauf" && <VerlaufView />}
         </AnimatePresence>
       </main>
@@ -75,7 +101,7 @@ const Index = () => {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-colors min-w-[64px] ${
+              className={`relative flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-colors min-w-[64px] ${
                 activeTab === tab.id
                   ? "text-primary"
                   : "text-muted-foreground hover:text-foreground"
@@ -98,7 +124,15 @@ const Index = () => {
 };
 
 // ─── Dashboard View ───────────────────────────────────────
-const DashboardView = ({ current }: { current?: { price: number; recommendation: string } }) => (
+interface DashboardViewProps {
+  current?: { price: number; recommendation: string };
+  deviceStates: Record<string, boolean>;
+  toggleDevice: (id: string) => void;
+  autoOptimize: boolean;
+  setAutoOptimize: (v: boolean) => void;
+}
+
+const DashboardView = ({ current, deviceStates, toggleDevice, autoOptimize, setAutoOptimize }: DashboardViewProps) => (
   <motion.div
     key="dashboard"
     initial={{ opacity: 0, y: 10 }}
@@ -107,6 +141,8 @@ const DashboardView = ({ current }: { current?: { price: number; recommendation:
     transition={{ duration: 0.25 }}
     className="space-y-6"
   >
+    <AutoOptimizationToggle enabled={autoOptimize} onToggle={setAutoOptimize} />
+
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
       <EnergyOverviewCard
         title="PV-Erzeugung"
@@ -152,6 +188,8 @@ const DashboardView = ({ current }: { current?: { price: number; recommendation:
       />
     </div>
 
+    <SavingsCounter />
+
     <EnergyFlowDiagram />
 
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -164,10 +202,10 @@ const DashboardView = ({ current }: { current?: { price: number; recommendation:
     <div>
       <h2 className="text-sm font-medium text-muted-foreground mb-4">Meine Geräte</h2>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        <DeviceCard name="PV-Anlage" icon={<Sun className="w-5 h-5" />} status="Produziert aktiv" power="3.8 kW" isActive delay={0.1} deviceId="pv" />
-        <DeviceCard name="Heimspeicher" icon={<Battery className="w-5 h-5" />} status="Laden · 92%" power="10.4 kWh" isActive delay={0.2} deviceId="battery" batteryPercent={92} />
-        <DeviceCard name="E-Auto" icon={<Car className="w-5 h-5" />} status="Verbunden · 67%" power="45 kWh" isActive={false} delay={0.3} deviceId="ev" batteryPercent={67} />
-        <DeviceCard name="Wärmepumpe" icon={<Thermometer className="w-5 h-5" />} status="Heizen · 22°C" power="2.1 kW" isActive delay={0.4} deviceId="heatpump" />
+        <DeviceCard name="PV-Anlage" icon={<Sun className="w-5 h-5" />} status="Produziert aktiv" power="3.8 kW" isActive={deviceStates.pv} onToggle={() => toggleDevice("pv")} delay={0.1} deviceId="pv" />
+        <DeviceCard name="Heimspeicher" icon={<Battery className="w-5 h-5" />} status="Laden · 92%" power="10.4 kWh" isActive={deviceStates.battery} onToggle={() => toggleDevice("battery")} delay={0.2} deviceId="battery" batteryPercent={92} />
+        <DeviceCard name="E-Auto" icon={<Car className="w-5 h-5" />} status="Verbunden · 67%" power="45 kWh" isActive={deviceStates.ev} onToggle={() => toggleDevice("ev")} delay={0.3} deviceId="ev" batteryPercent={67} />
+        <DeviceCard name="Wärmepumpe" icon={<Thermometer className="w-5 h-5" />} status="Heizen · 22°C" power="2.1 kW" isActive={deviceStates.heatpump} onToggle={() => toggleDevice("heatpump")} delay={0.4} deviceId="heatpump" />
       </div>
     </div>
 
@@ -188,27 +226,6 @@ const PreiseView = () => (
     <h2 className="text-lg font-bold text-foreground">Börsenstrompreise</h2>
     <PriceChart />
     <SmartRecommendations />
-  </motion.div>
-);
-
-// ─── Geräte View ──────────────────────────────────────────
-const GeraeteView = () => (
-  <motion.div
-    key="geraete"
-    initial={{ opacity: 0, y: 10 }}
-    animate={{ opacity: 1, y: 0 }}
-    exit={{ opacity: 0, y: -10 }}
-    transition={{ duration: 0.25 }}
-    className="space-y-4"
-  >
-    <h2 className="text-lg font-bold text-foreground">Meine Geräte</h2>
-    <EnergyFlowDiagram />
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-      <DeviceCard name="PV-Anlage" icon={<Sun className="w-5 h-5" />} status="Produziert aktiv" power="3.8 kW" isActive delay={0.05} deviceId="pv" />
-      <DeviceCard name="Heimspeicher" icon={<Battery className="w-5 h-5" />} status="Laden · 92%" power="10.4 kWh" isActive delay={0.1} deviceId="battery" batteryPercent={92} />
-      <DeviceCard name="E-Auto" icon={<Car className="w-5 h-5" />} status="Verbunden · 67%" power="45 kWh" isActive={false} delay={0.15} deviceId="ev" batteryPercent={67} />
-      <DeviceCard name="Wärmepumpe" icon={<Thermometer className="w-5 h-5" />} status="Heizen · 22°C" power="2.1 kW" isActive delay={0.2} deviceId="heatpump" />
-    </div>
   </motion.div>
 );
 
