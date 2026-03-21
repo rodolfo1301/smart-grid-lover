@@ -13,7 +13,8 @@ import SavingsCounter from "@/components/SavingsCounter";
 import AutoOptimizationToggle from "@/components/AutoOptimizationToggle";
 import GeraeteView from "@/components/GeraeteView";
 import TariffSwitchBanner from "@/components/TariffSwitchBanner";
-import InstallPWAButton from "@/components/InstallPWAButton";
+import OnboardingOverlay from "@/components/OnboardingOverlay";
+import SettingsView from "@/components/SettingsView";
 import { useMarketPrices, getCurrentPrice } from "@/hooks/useMarketPrices";
 
 const loadJson = <T,>(key: string, fallback: T): T => {
