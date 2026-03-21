@@ -1,6 +1,6 @@
 import { Zap, Sun, Battery, Car, Thermometer, TrendingUp, TrendingDown, BarChart3, Home, Cpu, BarChart2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import EnergyOverviewCard from "@/components/EnergyOverviewCard";
 import PriceChart from "@/components/PriceChart";
 import DeviceCard from "@/components/DeviceCard";
@@ -12,7 +12,18 @@ import PriceAlertBanner from "@/components/PriceAlertBanner";
 import SavingsCounter from "@/components/SavingsCounter";
 import AutoOptimizationToggle from "@/components/AutoOptimizationToggle";
 import GeraeteView from "@/components/GeraeteView";
+import TariffSwitchBanner from "@/components/TariffSwitchBanner";
+import InstallPWAButton from "@/components/InstallPWAButton";
 import { useMarketPrices, getCurrentPrice } from "@/hooks/useMarketPrices";
+
+const loadJson = <T,>(key: string, fallback: T): T => {
+  try {
+    const v = localStorage.getItem(key);
+    return v ? JSON.parse(v) : fallback;
+  } catch {
+    return fallback;
+  }
+};
 
 type TabId = "dashboard" | "preise" | "geraete" | "verlauf";
 
