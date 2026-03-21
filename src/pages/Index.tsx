@@ -205,6 +205,8 @@ const DashboardView = ({ current, deviceStates, toggleDevice, autoOptimize, setA
 
     <SavingsCounter />
 
+    <TariffSwitchBanner />
+
     <EnergyFlowDiagram />
 
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
