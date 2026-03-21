@@ -40,6 +40,7 @@ const tabs: { id: TabId; label: string; icon: React.ReactNode }[] = [
 const Index = () => {
   const { data: prices } = useMarketPrices();
   const current = prices ? getCurrentPrice(prices) : undefined;
+  const [showOnboarding, setShowOnboarding] = useState(() => !localStorage.getItem("wattly_onboarded"));
   const [activeTab, setActiveTab] = useState<TabId>("dashboard");
   const [autoOptimize, setAutoOptimize] = useState(() => loadJson("wattly_autoOptimize", true));
   const [deviceStates, setDeviceStates] = useState<Record<string, boolean>>(() =>
