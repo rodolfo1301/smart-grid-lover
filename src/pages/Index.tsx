@@ -1,4 +1,4 @@
-import { Zap, Sun, Battery, Car, Thermometer, TrendingUp, TrendingDown, BarChart3, Home, Cpu, BarChart2 } from "lucide-react";
+import { Zap, Sun, Battery, Car, Thermometer, TrendingUp, TrendingDown, BarChart3, Home, Cpu, BarChart2, Settings } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import EnergyOverviewCard from "@/components/EnergyOverviewCard";
@@ -14,6 +14,8 @@ import AutoOptimizationToggle from "@/components/AutoOptimizationToggle";
 import GeraeteView from "@/components/GeraeteView";
 import TariffSwitchBanner from "@/components/TariffSwitchBanner";
 import InstallPWAButton from "@/components/InstallPWAButton";
+import OnboardingOverlay from "@/components/OnboardingOverlay";
+import SettingsView from "@/components/SettingsView";
 import { useMarketPrices, getCurrentPrice } from "@/hooks/useMarketPrices";
 
 const loadJson = <T,>(key: string, fallback: T): T => {
@@ -25,18 +27,20 @@ const loadJson = <T,>(key: string, fallback: T): T => {
   }
 };
 
-type TabId = "dashboard" | "preise" | "geraete" | "verlauf";
+type TabId = "dashboard" | "preise" | "geraete" | "verlauf" | "settings";
 
 const tabs: { id: TabId; label: string; icon: React.ReactNode }[] = [
   { id: "dashboard", label: "Dashboard", icon: <Home className="w-5 h-5" /> },
   { id: "preise", label: "Preise", icon: <TrendingUp className="w-5 h-5" /> },
   { id: "geraete", label: "Geräte", icon: <Cpu className="w-5 h-5" /> },
   { id: "verlauf", label: "Verlauf", icon: <BarChart2 className="w-5 h-5" /> },
+  { id: "settings", label: "Mehr", icon: <Settings className="w-5 h-5" /> },
 ];
 
 const Index = () => {
   const { data: prices } = useMarketPrices();
   const current = prices ? getCurrentPrice(prices) : undefined;
+  const [showOnboarding, setShowOnboarding] = useState(() => !localStorage.getItem("wattly_onboarded"));
   const [activeTab, setActiveTab] = useState<TabId>("dashboard");
   const [autoOptimize, setAutoOptimize] = useState(() => loadJson("wattly_autoOptimize", true));
   const [deviceStates, setDeviceStates] = useState<Record<string, boolean>>(() =>
@@ -55,7 +59,16 @@ const Index = () => {
     setDeviceStates((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
+  const handleOnboardingComplete = (devices: Record<string, boolean>) => {
+    setDeviceStates(devices);
+    setShowOnboarding(false);
+  };
+
   return (
+    <>
+    <AnimatePresence>
+      {showOnboarding && <OnboardingOverlay onComplete={handleOnboardingComplete} />}
+    </AnimatePresence>
     <div className="min-h-screen bg-background pb-20">
       {/* Header */}
       <header className="border-b border-border px-4 sm:px-6 py-4 sticky top-0 z-40 bg-background/80 backdrop-blur-md">
@@ -106,6 +119,7 @@ const Index = () => {
             <GeraeteView deviceStates={deviceStates} toggleDevice={toggleDevice} />
           )}
           {activeTab === "verlauf" && <VerlaufView />}
+          {activeTab === "settings" && <SettingsView />}
         </AnimatePresence>
       </main>
 
@@ -116,7 +130,7 @@ const Index = () => {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`relative flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-colors min-w-[64px] ${
+              className={`relative flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-colors min-w-[56px] ${
                 activeTab === tab.id
                   ? "text-primary"
                   : "text-muted-foreground hover:text-foreground"
@@ -135,6 +149,7 @@ const Index = () => {
         </div>
       </nav>
     </div>
+    </>
   );
 };
 
