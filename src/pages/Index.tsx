@@ -38,15 +38,18 @@ const Index = () => {
   const { data: prices } = useMarketPrices();
   const current = prices ? getCurrentPrice(prices) : undefined;
   const [activeTab, setActiveTab] = useState<TabId>("dashboard");
-  const [autoOptimize, setAutoOptimize] = useState(true);
+  const [autoOptimize, setAutoOptimize] = useState(() => loadJson("wattly_autoOptimize", true));
+  const [deviceStates, setDeviceStates] = useState<Record<string, boolean>>(() =>
+    loadJson("wattly_deviceStates", { pv: true, battery: true, ev: false, heatpump: true })
+  );
 
-  // Global device states
-  const [deviceStates, setDeviceStates] = useState<Record<string, boolean>>({
-    pv: true,
-    battery: true,
-    ev: false,
-    heatpump: true,
-  });
+  useEffect(() => {
+    localStorage.setItem("wattly_deviceStates", JSON.stringify(deviceStates));
+  }, [deviceStates]);
+
+  useEffect(() => {
+    localStorage.setItem("wattly_autoOptimize", JSON.stringify(autoOptimize));
+  }, [autoOptimize]);
 
   const toggleDevice = (id: string) => {
     setDeviceStates((prev) => ({ ...prev, [id]: !prev[id] }));
