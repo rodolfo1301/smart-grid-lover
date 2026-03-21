@@ -71,7 +71,8 @@ const Index = () => {
               <p className="text-xs text-muted-foreground hidden sm:block">Smart Energy Dashboard</p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <InstallPWAButton />
             <ThemeToggle />
             <div className="flex items-center gap-2">
               <span className="text-xs text-muted-foreground hidden sm:inline">Live</span>
