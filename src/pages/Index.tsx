@@ -119,6 +119,7 @@ const Index = () => {
             <GeraeteView deviceStates={deviceStates} toggleDevice={toggleDevice} />
           )}
           {activeTab === "verlauf" && <VerlaufView />}
+          {activeTab === "settings" && <SettingsView />}
         </AnimatePresence>
       </main>
 
@@ -129,7 +130,7 @@ const Index = () => {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`relative flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-colors min-w-[64px] ${
+              className={`relative flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-colors min-w-[56px] ${
                 activeTab === tab.id
                   ? "text-primary"
                   : "text-muted-foreground hover:text-foreground"
@@ -148,6 +149,7 @@ const Index = () => {
         </div>
       </nav>
     </div>
+    </>
   );
 };
 
