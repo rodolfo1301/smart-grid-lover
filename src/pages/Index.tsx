@@ -59,7 +59,16 @@ const Index = () => {
     setDeviceStates((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
+  const handleOnboardingComplete = (devices: Record<string, boolean>) => {
+    setDeviceStates(devices);
+    setShowOnboarding(false);
+  };
+
   return (
+    <>
+    <AnimatePresence>
+      {showOnboarding && <OnboardingOverlay onComplete={handleOnboardingComplete} />}
+    </AnimatePresence>
     <div className="min-h-screen bg-background pb-20">
       {/* Header */}
       <header className="border-b border-border px-4 sm:px-6 py-4 sticky top-0 z-40 bg-background/80 backdrop-blur-md">
