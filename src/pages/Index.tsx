@@ -1,6 +1,6 @@
 import { Zap, Sun, Battery, Car, Thermometer, TrendingUp, TrendingDown, BarChart3, Home, Cpu, BarChart2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import EnergyOverviewCard from "@/components/EnergyOverviewCard";
 import PriceChart from "@/components/PriceChart";
 import DeviceCard from "@/components/DeviceCard";
@@ -12,7 +12,18 @@ import PriceAlertBanner from "@/components/PriceAlertBanner";
 import SavingsCounter from "@/components/SavingsCounter";
 import AutoOptimizationToggle from "@/components/AutoOptimizationToggle";
 import GeraeteView from "@/components/GeraeteView";
+import TariffSwitchBanner from "@/components/TariffSwitchBanner";
+import InstallPWAButton from "@/components/InstallPWAButton";
 import { useMarketPrices, getCurrentPrice } from "@/hooks/useMarketPrices";
+
+const loadJson = <T,>(key: string, fallback: T): T => {
+  try {
+    const v = localStorage.getItem(key);
+    return v ? JSON.parse(v) : fallback;
+  } catch {
+    return fallback;
+  }
+};
 
 type TabId = "dashboard" | "preise" | "geraete" | "verlauf";
 
@@ -27,15 +38,18 @@ const Index = () => {
   const { data: prices } = useMarketPrices();
   const current = prices ? getCurrentPrice(prices) : undefined;
   const [activeTab, setActiveTab] = useState<TabId>("dashboard");
-  const [autoOptimize, setAutoOptimize] = useState(true);
+  const [autoOptimize, setAutoOptimize] = useState(() => loadJson("wattly_autoOptimize", true));
+  const [deviceStates, setDeviceStates] = useState<Record<string, boolean>>(() =>
+    loadJson("wattly_deviceStates", { pv: true, battery: true, ev: false, heatpump: true })
+  );
 
-  // Global device states
-  const [deviceStates, setDeviceStates] = useState<Record<string, boolean>>({
-    pv: true,
-    battery: true,
-    ev: false,
-    heatpump: true,
-  });
+  useEffect(() => {
+    localStorage.setItem("wattly_deviceStates", JSON.stringify(deviceStates));
+  }, [deviceStates]);
+
+  useEffect(() => {
+    localStorage.setItem("wattly_autoOptimize", JSON.stringify(autoOptimize));
+  }, [autoOptimize]);
 
   const toggleDevice = (id: string) => {
     setDeviceStates((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -57,7 +71,8 @@ const Index = () => {
               <p className="text-xs text-muted-foreground hidden sm:block">Smart Energy Dashboard</p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <InstallPWAButton />
             <ThemeToggle />
             <div className="flex items-center gap-2">
               <span className="text-xs text-muted-foreground hidden sm:inline">Live</span>
@@ -189,6 +204,8 @@ const DashboardView = ({ current, deviceStates, toggleDevice, autoOptimize, setA
     </div>
 
     <SavingsCounter />
+
+    <TariffSwitchBanner />
 
     <EnergyFlowDiagram />
 
