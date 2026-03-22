@@ -52,6 +52,8 @@ const OnboardingOverlay = ({ onComplete }: OnboardingOverlayProps) => {
     localStorage.setItem("wattly_onboarded", "true");
     localStorage.setItem("wattly_tariff", tariff);
     if (tariff === "fixed") localStorage.setItem("wattly_fixedPrice", fixedPrice);
+    const mode = deviceCount === 0 ? "basis" : "full";
+    localStorage.setItem("wattly_mode", mode);
     onComplete(selectedDevices);
   };
 
@@ -118,7 +120,6 @@ const OnboardingOverlay = ({ onComplete }: OnboardingOverlayProps) => {
               className="w-full gap-2"
               size="lg"
               onClick={() => setStep(1)}
-              disabled={deviceCount === 0}
             >
               Weiter <ArrowRight className="w-4 h-4" />
             </Button>

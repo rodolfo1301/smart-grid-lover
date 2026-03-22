@@ -16,6 +16,7 @@ import TariffSwitchBanner from "@/components/TariffSwitchBanner";
 import InstallPWAButton from "@/components/InstallPWAButton";
 import OnboardingOverlay from "@/components/OnboardingOverlay";
 import SettingsView from "@/components/SettingsView";
+import BasisDashboardView from "@/components/BasisDashboardView";
 import { useMarketPrices, getCurrentPrice } from "@/hooks/useMarketPrices";
 
 const loadJson = <T,>(key: string, fallback: T): T => {
@@ -29,10 +30,17 @@ const loadJson = <T,>(key: string, fallback: T): T => {
 
 type TabId = "dashboard" | "preise" | "geraete" | "verlauf" | "settings";
 
-const tabs: { id: TabId; label: string; icon: React.ReactNode }[] = [
+const fullTabs: { id: TabId; label: string; icon: React.ReactNode }[] = [
   { id: "dashboard", label: "Dashboard", icon: <Home className="w-5 h-5" /> },
   { id: "preise", label: "Preise", icon: <TrendingUp className="w-5 h-5" /> },
   { id: "geraete", label: "Geräte", icon: <Cpu className="w-5 h-5" /> },
+  { id: "verlauf", label: "Verlauf", icon: <BarChart2 className="w-5 h-5" /> },
+  { id: "settings", label: "Mehr", icon: <Settings className="w-5 h-5" /> },
+];
+
+const basisTabs: { id: TabId; label: string; icon: React.ReactNode }[] = [
+  { id: "dashboard", label: "Dashboard", icon: <Home className="w-5 h-5" /> },
+  { id: "preise", label: "Preise", icon: <TrendingUp className="w-5 h-5" /> },
   { id: "verlauf", label: "Verlauf", icon: <BarChart2 className="w-5 h-5" /> },
   { id: "settings", label: "Mehr", icon: <Settings className="w-5 h-5" /> },
 ];
@@ -41,11 +49,15 @@ const Index = () => {
   const { data: prices } = useMarketPrices();
   const current = prices ? getCurrentPrice(prices) : undefined;
   const [showOnboarding, setShowOnboarding] = useState(() => !localStorage.getItem("wattly_onboarded"));
+  const [wattlyMode, setWattlyMode] = useState(() => localStorage.getItem("wattly_mode") || "full");
   const [activeTab, setActiveTab] = useState<TabId>("dashboard");
   const [autoOptimize, setAutoOptimize] = useState(() => loadJson("wattly_autoOptimize", true));
   const [deviceStates, setDeviceStates] = useState<Record<string, boolean>>(() =>
     loadJson("wattly_deviceStates", { pv: true, battery: true, ev: false, heatpump: true })
   );
+
+  const isBasis = wattlyMode === "basis";
+  const tabs = isBasis ? basisTabs : fullTabs;
 
   useEffect(() => {
     localStorage.setItem("wattly_deviceStates", JSON.stringify(deviceStates));
@@ -61,7 +73,14 @@ const Index = () => {
 
   const handleOnboardingComplete = (devices: Record<string, boolean>) => {
     setDeviceStates(devices);
+    setWattlyMode(localStorage.getItem("wattly_mode") || "full");
     setShowOnboarding(false);
+  };
+
+  const triggerReOnboard = () => {
+    localStorage.removeItem("wattly_onboarded");
+    localStorage.removeItem("wattly_mode");
+    setShowOnboarding(true);
   };
 
   return (
@@ -106,16 +125,20 @@ const Index = () => {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
         <AnimatePresence mode="wait">
           {activeTab === "dashboard" && (
-            <DashboardView
-              current={current}
-              deviceStates={deviceStates}
-              toggleDevice={toggleDevice}
-              autoOptimize={autoOptimize}
-              setAutoOptimize={setAutoOptimize}
-            />
+            isBasis ? (
+              <BasisDashboardView onReOnboard={triggerReOnboard} />
+            ) : (
+              <DashboardView
+                current={current}
+                deviceStates={deviceStates}
+                toggleDevice={toggleDevice}
+                autoOptimize={autoOptimize}
+                setAutoOptimize={setAutoOptimize}
+              />
+            )
           )}
           {activeTab === "preise" && <PreiseView />}
-          {activeTab === "geraete" && (
+          {activeTab === "geraete" && !isBasis && (
             <GeraeteView deviceStates={deviceStates} toggleDevice={toggleDevice} />
           )}
           {activeTab === "verlauf" && <VerlaufView />}

@@ -102,6 +102,25 @@ const SettingsView = () => {
         </div>
       </section>
 
+      {/* Mode switch */}
+      <section className="bg-card border border-border rounded-xl p-4 space-y-3">
+        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Modus</h3>
+        <p className="text-sm text-muted-foreground">
+          Aktuell: <span className="font-medium text-foreground">{localStorage.getItem("wattly_mode") === "basis" ? "Basis-Modus" : "Voll-Modus"}</span>
+        </p>
+        <Button
+          variant="outline"
+          className="w-full"
+          onClick={() => {
+            localStorage.removeItem("wattly_mode");
+            localStorage.removeItem("wattly_onboarded");
+            window.location.reload();
+          }}
+        >
+          Modus wechseln (Onboarding neu starten)
+        </Button>
+      </section>
+
       {/* Actions */}
       <div className="flex flex-col gap-3">
         <Button onClick={save} className="w-full">
