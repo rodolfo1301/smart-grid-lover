@@ -125,16 +125,20 @@ const Index = () => {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
         <AnimatePresence mode="wait">
           {activeTab === "dashboard" && (
-            <DashboardView
-              current={current}
-              deviceStates={deviceStates}
-              toggleDevice={toggleDevice}
-              autoOptimize={autoOptimize}
-              setAutoOptimize={setAutoOptimize}
-            />
+            isBasis ? (
+              <BasisDashboardView onReOnboard={triggerReOnboard} />
+            ) : (
+              <DashboardView
+                current={current}
+                deviceStates={deviceStates}
+                toggleDevice={toggleDevice}
+                autoOptimize={autoOptimize}
+                setAutoOptimize={setAutoOptimize}
+              />
+            )
           )}
           {activeTab === "preise" && <PreiseView />}
-          {activeTab === "geraete" && (
+          {activeTab === "geraete" && !isBasis && (
             <GeraeteView deviceStates={deviceStates} toggleDevice={toggleDevice} />
           )}
           {activeTab === "verlauf" && <VerlaufView />}
