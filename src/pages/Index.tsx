@@ -16,6 +16,7 @@ import TariffSwitchBanner from "@/components/TariffSwitchBanner";
 import InstallPWAButton from "@/components/InstallPWAButton";
 import OnboardingOverlay from "@/components/OnboardingOverlay";
 import SettingsView from "@/components/SettingsView";
+import BasisDashboardView from "@/components/BasisDashboardView";
 import { useMarketPrices, getCurrentPrice } from "@/hooks/useMarketPrices";
 
 const loadJson = <T,>(key: string, fallback: T): T => {
@@ -29,10 +30,17 @@ const loadJson = <T,>(key: string, fallback: T): T => {
 
 type TabId = "dashboard" | "preise" | "geraete" | "verlauf" | "settings";
 
-const tabs: { id: TabId; label: string; icon: React.ReactNode }[] = [
+const fullTabs: { id: TabId; label: string; icon: React.ReactNode }[] = [
   { id: "dashboard", label: "Dashboard", icon: <Home className="w-5 h-5" /> },
   { id: "preise", label: "Preise", icon: <TrendingUp className="w-5 h-5" /> },
   { id: "geraete", label: "Geräte", icon: <Cpu className="w-5 h-5" /> },
+  { id: "verlauf", label: "Verlauf", icon: <BarChart2 className="w-5 h-5" /> },
+  { id: "settings", label: "Mehr", icon: <Settings className="w-5 h-5" /> },
+];
+
+const basisTabs: { id: TabId; label: string; icon: React.ReactNode }[] = [
+  { id: "dashboard", label: "Dashboard", icon: <Home className="w-5 h-5" /> },
+  { id: "preise", label: "Preise", icon: <TrendingUp className="w-5 h-5" /> },
   { id: "verlauf", label: "Verlauf", icon: <BarChart2 className="w-5 h-5" /> },
   { id: "settings", label: "Mehr", icon: <Settings className="w-5 h-5" /> },
 ];
