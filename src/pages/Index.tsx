@@ -49,11 +49,15 @@ const Index = () => {
   const { data: prices } = useMarketPrices();
   const current = prices ? getCurrentPrice(prices) : undefined;
   const [showOnboarding, setShowOnboarding] = useState(() => !localStorage.getItem("wattly_onboarded"));
+  const [wattlyMode, setWattlyMode] = useState(() => localStorage.getItem("wattly_mode") || "full");
   const [activeTab, setActiveTab] = useState<TabId>("dashboard");
   const [autoOptimize, setAutoOptimize] = useState(() => loadJson("wattly_autoOptimize", true));
   const [deviceStates, setDeviceStates] = useState<Record<string, boolean>>(() =>
     loadJson("wattly_deviceStates", { pv: true, battery: true, ev: false, heatpump: true })
   );
+
+  const isBasis = wattlyMode === "basis";
+  const tabs = isBasis ? basisTabs : fullTabs;
 
   useEffect(() => {
     localStorage.setItem("wattly_deviceStates", JSON.stringify(deviceStates));
@@ -69,7 +73,14 @@ const Index = () => {
 
   const handleOnboardingComplete = (devices: Record<string, boolean>) => {
     setDeviceStates(devices);
+    setWattlyMode(localStorage.getItem("wattly_mode") || "full");
     setShowOnboarding(false);
+  };
+
+  const triggerReOnboard = () => {
+    localStorage.removeItem("wattly_onboarded");
+    localStorage.removeItem("wattly_mode");
+    setShowOnboarding(true);
   };
 
   return (
