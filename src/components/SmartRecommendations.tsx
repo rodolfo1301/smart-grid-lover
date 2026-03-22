@@ -102,6 +102,9 @@ const SmartRecommendations = () => {
           </motion.div>
         ))}
       </div>
+      <p className="text-[10px] text-muted-foreground italic mt-3 pt-3 border-t border-border">
+        Empfehlungen basieren auf EPEX SPOT AT Börsenpreisen.
+      </p>
     </motion.div>
   );
 };

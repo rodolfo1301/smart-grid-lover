@@ -146,6 +146,10 @@ const PriceChart = () => {
           ))}
         </div>
       )}
+
+      <p className="text-xs text-muted-foreground italic mt-3 px-1">
+        * Börsenstrompreis (EPEX SPOT AT) ohne Netzgebühren, Steuern und Abgaben. Endpreis beim Versorger höher.
+      </p>
     </motion.div>
   );
 };

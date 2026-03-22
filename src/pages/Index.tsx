@@ -1,4 +1,4 @@
-import { Zap, Sun, Battery, Car, Thermometer, TrendingUp, TrendingDown, BarChart3, Home, Cpu, BarChart2, Settings } from "lucide-react";
+import { Zap, Sun, Battery, Car, Thermometer, TrendingUp, TrendingDown, BarChart3, Home, Cpu, BarChart2, Settings, Info } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import EnergyOverviewCard from "@/components/EnergyOverviewCard";
@@ -228,6 +228,7 @@ const DashboardView = ({ current, deviceStates, toggleDevice, autoOptimize, setA
         value={current ? current.price.toFixed(1) : "—"}
         unit="ct/kWh"
         icon={<TrendingDown className="w-4 h-4 text-muted-foreground" />}
+        infoTooltip="Reiner Börsenstrompreis. Ihr tatsächlicher Tarif kann abweichen."
         trend={
           current
             ? current.recommendation === "laden"
