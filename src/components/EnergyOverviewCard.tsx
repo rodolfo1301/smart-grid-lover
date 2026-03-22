@@ -22,6 +22,7 @@ const EnergyOverviewCard = ({
   trend,
   trendPositive,
   variant = "default",
+  infoTooltip,
 }: EnergyOverviewCardProps) => {
   const gradientClass =
     variant === "energy"
