@@ -52,6 +52,8 @@ const OnboardingOverlay = ({ onComplete }: OnboardingOverlayProps) => {
     localStorage.setItem("wattly_onboarded", "true");
     localStorage.setItem("wattly_tariff", tariff);
     if (tariff === "fixed") localStorage.setItem("wattly_fixedPrice", fixedPrice);
+    const mode = deviceCount === 0 ? "basis" : "full";
+    localStorage.setItem("wattly_mode", mode);
     onComplete(selectedDevices);
   };
 
