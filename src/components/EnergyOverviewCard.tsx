@@ -1,5 +1,7 @@
 import { motion } from "framer-motion";
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
+import { Info } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface EnergyOverviewCardProps {
   title: string;
@@ -9,6 +11,7 @@ interface EnergyOverviewCardProps {
   trend?: string;
   trendPositive?: boolean;
   variant?: "energy" | "consumption" | "default";
+  infoTooltip?: string;
 }
 
 const EnergyOverviewCard = ({
