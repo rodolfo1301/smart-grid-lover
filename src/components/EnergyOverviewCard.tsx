@@ -45,9 +45,23 @@ const EnergyOverviewCard = ({
       )}
       <div className="relative z-10">
         <div className="flex items-center justify-between mb-3">
-          <span className={`text-sm font-medium ${variant !== "default" ? "text-foreground/90" : "text-muted-foreground"}`}>
-            {title}
-          </span>
+          <div className="flex items-center gap-1.5">
+            <span className={`text-sm font-medium ${variant !== "default" ? "text-foreground/90" : "text-muted-foreground"}`}>
+              {title}
+            </span>
+            {infoTooltip && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Info className="w-3.5 h-3.5 text-muted-foreground/60 cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="max-w-[200px] text-xs">
+                    {infoTooltip}
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
+          </div>
           <div className={`p-2 rounded-lg ${variant !== "default" ? "bg-background/20" : "bg-secondary"}`}>
             {icon}
           </div>
