@@ -120,7 +120,6 @@ const OnboardingOverlay = ({ onComplete }: OnboardingOverlayProps) => {
               className="w-full gap-2"
               size="lg"
               onClick={() => setStep(1)}
-              disabled={deviceCount === 0}
             >
               Weiter <ArrowRight className="w-4 h-4" />
             </Button>
