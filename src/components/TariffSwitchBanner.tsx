@@ -34,7 +34,11 @@ const TariffSwitchBanner = () => {
           <span className="text-2xl">💡</span>
           <div className="space-y-2">
             <h3 className="text-sm font-bold text-foreground">
-              Du würdest mit einem dynamischen Tarif ~312&nbsp;€/Jahr sparen
+              {(() => {
+                const fixedPrice = parseFloat(localStorage.getItem("wattly_fixedPrice") || "28");
+                const savings = Math.round(fixedPrice * 0.3 * 12 * 3.5);
+                return `Du würdest mit einem dynamischen Tarif ~${savings}\u00A0€/Jahr sparen`;
+              })()}
             </h3>
             <p className="text-xs text-muted-foreground">
               Basierend auf deinem Verbrauch und den aktuellen Börsenpreisen

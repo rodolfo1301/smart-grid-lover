@@ -228,6 +228,7 @@ const DashboardView = ({ current, deviceStates, toggleDevice, autoOptimize, setA
         value={current ? current.price.toFixed(1) : "—"}
         unit="ct/kWh"
         icon={<TrendingDown className="w-4 h-4 text-muted-foreground" />}
+        infoTooltip="Reiner Börsenstrompreis. Ihr tatsächlicher Tarif kann abweichen."
         trend={
           current
             ? current.recommendation === "laden"
