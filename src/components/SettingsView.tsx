@@ -27,6 +27,8 @@ const SettingsView = () => {
     localStorage.setItem("wattly_fixedPrice", gridPrice);
     localStorage.setItem("wattly_notifPrice", String(notifPrice));
     localStorage.setItem("wattly_notifDevices", String(notifDevices));
+    localStorage.setItem("wattly_tariff_type", tariffType);
+    localStorage.setItem("wattly_fixed_price", fixedPrice);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
