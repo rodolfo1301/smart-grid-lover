@@ -51,6 +51,42 @@ const SettingsView = () => {
     >
       <h2 className="text-lg font-bold text-foreground">Einstellungen</h2>
 
+      {/* Mein Tarif */}
+      <section className="bg-gradient-card border border-border rounded-xl p-4 space-y-4">
+        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Mein Tarif</h3>
+        <RadioGroup value={tariffType} onValueChange={setTariffType} className="space-y-2">
+          {[
+            { value: "dynamic", label: "⚡ Börsenstromtarif (aWATTar / Tibber)" },
+            { value: "fixed", label: "📋 Fixer Tarif" },
+          ].map((t) => (
+            <label
+              key={t.value}
+              className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
+                tariffType === t.value ? "border-primary bg-primary/10" : "border-border"
+              }`}
+            >
+              <RadioGroupItem value={t.value} />
+              <span className="text-sm text-foreground">{t.label}</span>
+            </label>
+          ))}
+        </RadioGroup>
+        {tariffType === "fixed" && (
+          <div className="space-y-2 pt-1">
+            <Label className="text-xs text-muted-foreground">Mein aktueller Strompreis</Label>
+            <div className="flex items-center gap-2">
+              <Input
+                type="number"
+                value={fixedPrice}
+                onChange={(e) => setFixedPrice(e.target.value)}
+                placeholder="28"
+                className="font-mono flex-1"
+              />
+              <span className="text-sm text-muted-foreground whitespace-nowrap">ct/kWh</span>
+            </div>
+          </div>
+        )}
+      </section>
+
       {/* Profile */}
       <section className="bg-gradient-card border border-border rounded-xl p-4 space-y-4">
         <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Profil</h3>
