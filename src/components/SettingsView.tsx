@@ -5,11 +5,31 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Trash2 } from "lucide-react";
+import { Slider } from "@/components/ui/slider";
+import { Trash2, Bell, BellOff, CheckCircle2 } from "lucide-react";
+import { useNotifications } from "@/hooks/useNotifications";
 
 const loadStr = (key: string, fallback: string) => localStorage.getItem(key) ?? fallback;
+const loadBool = (key: string, fallback: boolean) => {
+  const v = localStorage.getItem(key);
+  return v !== null ? v === "true" : fallback;
+};
 
 const SettingsView = () => {
+  const { permission, requestPermission } = useNotifications();
+
+  const [notif2hCheap, setNotif2hCheap] = useState(() => loadBool("wattly_notif_2h_cheap", true));
+  const [notifNowCheap, setNotifNowCheap] = useState(() => loadBool("wattly_notif_now_cheap", true));
+  const [notif30mExpensive, setNotif30mExpensive] = useState(() => loadBool("wattly_notif_30m_expensive", true));
+  const [notifNowExpensive, setNotifNowExpensive] = useState(() => loadBool("wattly_notif_now_expensive", true));
+  const [cheapThreshold, setCheapThreshold] = useState(() => Number(loadStr("wattly_notif_cheap_threshold", "5")));
+  const [expensiveThreshold, setExpensiveThreshold] = useState(() => Number(loadStr("wattly_notif_expensive_threshold", "15")));
+
+  const toggleNotifPref = (key: string, value: boolean, setter: (v: boolean) => void) => {
+    setter(value);
+    localStorage.setItem(key, String(value));
+  };
+
   const [name, setName] = useState(() => loadStr("wattly_userName", ""));
   const [pvCapacity, setPvCapacity] = useState(() => loadStr("wattly_pvCapacity", "8.5"));
   const [tariff, setTariff] = useState(() => loadStr("wattly_tariff", "unknown"));
@@ -50,6 +70,105 @@ const SettingsView = () => {
       className="space-y-6"
     >
       <h2 className="text-lg font-bold text-foreground">Einstellungen</h2>
+
+      {/* Push Notifications */}
+      <section className="bg-gradient-card border border-border rounded-xl p-4 space-y-4">
+        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+          <Bell className="w-4 h-4" /> Benachrichtigungen
+        </h3>
+
+        {permission === "default" && (
+          <Button
+            onClick={requestPermission}
+            className="w-full gap-2 bg-primary hover:bg-primary/90"
+          >
+            🔔 Benachrichtigungen aktivieren
+          </Button>
+        )}
+
+        {permission === "granted" && (
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 text-primary">
+              <CheckCircle2 className="w-5 h-5" />
+              <span className="text-sm font-medium">Benachrichtigungen aktiv</span>
+            </div>
+
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-foreground">2h Vorwarnung bei günstigem Strom</span>
+                <Switch
+                  checked={notif2hCheap}
+                  onCheckedChange={(v) => toggleNotifPref("wattly_notif_2h_cheap", v, setNotif2hCheap)}
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-foreground">Sofort-Alert bei günstigem Strom</span>
+                <Switch
+                  checked={notifNowCheap}
+                  onCheckedChange={(v) => toggleNotifPref("wattly_notif_now_cheap", v, setNotifNowCheap)}
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-foreground">30min Warnung vor teurem Strom</span>
+                <Switch
+                  checked={notif30mExpensive}
+                  onCheckedChange={(v) => toggleNotifPref("wattly_notif_30m_expensive", v, setNotif30mExpensive)}
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-foreground">Sofort-Alert bei teurem Strom</span>
+                <Switch
+                  checked={notifNowExpensive}
+                  onCheckedChange={(v) => toggleNotifPref("wattly_notif_now_expensive", v, setNotifNowExpensive)}
+                />
+              </div>
+
+              <div className="space-y-2 pt-2">
+                <Label className="text-xs text-muted-foreground">
+                  Günstig-Schwellwert: <span className="font-mono font-medium text-foreground">{cheapThreshold} ct/kWh</span>
+                </Label>
+                <Slider
+                  value={[cheapThreshold]}
+                  onValueChange={([v]) => {
+                    setCheapThreshold(v);
+                    localStorage.setItem("wattly_notif_cheap_threshold", String(v));
+                  }}
+                  min={1}
+                  max={10}
+                  step={1}
+                  className="w-full"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-xs text-muted-foreground">
+                  Teuer-Schwellwert: <span className="font-mono font-medium text-foreground">{expensiveThreshold} ct/kWh</span>
+                </Label>
+                <Slider
+                  value={[expensiveThreshold]}
+                  onValueChange={([v]) => {
+                    setExpensiveThreshold(v);
+                    localStorage.setItem("wattly_notif_expensive_threshold", String(v));
+                  }}
+                  min={10}
+                  max={30}
+                  step={1}
+                  className="w-full"
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {permission === "denied" && (
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <BellOff className="w-5 h-5" />
+            <p className="text-sm">
+              Benachrichtigungen wurden blockiert. Bitte in den Browser-Einstellungen aktivieren.
+            </p>
+          </div>
+        )}
+      </section>
 
       {/* Mein Tarif */}
       <section className="bg-gradient-card border border-border rounded-xl p-4 space-y-4">
