@@ -14,6 +14,8 @@ const SettingsView = () => {
   const [pvCapacity, setPvCapacity] = useState(() => loadStr("wattly_pvCapacity", "8.5"));
   const [tariff, setTariff] = useState(() => loadStr("wattly_tariff", "unknown"));
   const [gridPrice, setGridPrice] = useState(() => loadStr("wattly_fixedPrice", "30"));
+  const [tariffType, setTariffType] = useState(() => loadStr("wattly_tariff_type", "dynamic"));
+  const [fixedPrice, setFixedPrice] = useState(() => loadStr("wattly_fixed_price", "28"));
   const [notifPrice, setNotifPrice] = useState(() => loadStr("wattly_notifPrice", "true") === "true");
   const [notifDevices, setNotifDevices] = useState(() => loadStr("wattly_notifDevices", "true") === "true");
   const [saved, setSaved] = useState(false);
