@@ -147,8 +147,8 @@ const PriceChart = () => {
         </div>
       )}
 
-      <p className="text-xs text-muted-foreground italic mt-3 px-1">
-        * Börsenstrompreis (EPEX SPOT AT) ohne Netzgebühren, Steuern und Abgaben. Endpreis beim Versorger höher.
+      <p className="text-xs text-muted-foreground italic mt-2 text-center">
+        * Börsenstrompreis (EPEX SPOT AT) ohne Netzgebühren und Steuern
       </p>
     </motion.div>
   );
