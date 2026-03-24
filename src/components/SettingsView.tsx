@@ -6,7 +6,7 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Slider } from "@/components/ui/slider";
-import { Trash2, Bell, BellOff, CheckCircle2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { useNotifications } from "@/hooks/useNotifications";
 
 const loadStr = (key: string, fallback: string) => localStorage.getItem(key) ?? fallback;
