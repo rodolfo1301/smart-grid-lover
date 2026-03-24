@@ -18,17 +18,12 @@ const loadBool = (key: string, fallback: boolean) => {
 const SettingsView = () => {
   const { permission, requestPermission } = useNotifications();
 
-  const [notif2hCheap, setNotif2hCheap] = useState(() => loadBool("wattly_notif_2h_cheap", true));
-  const [notifNowCheap, setNotifNowCheap] = useState(() => loadBool("wattly_notif_now_cheap", true));
-  const [notif30mExpensive, setNotif30mExpensive] = useState(() => loadBool("wattly_notif_30m_expensive", true));
-  const [notifNowExpensive, setNotifNowExpensive] = useState(() => loadBool("wattly_notif_now_expensive", true));
-  const [cheapThreshold, setCheapThreshold] = useState(() => Number(loadStr("wattly_notif_cheap_threshold", "5")));
-  const [expensiveThreshold, setExpensiveThreshold] = useState(() => Number(loadStr("wattly_notif_expensive_threshold", "15")));
-
-  const toggleNotifPref = (key: string, value: boolean, setter: (v: boolean) => void) => {
-    setter(value);
-    localStorage.setItem(key, String(value));
-  };
+  const [notif2h, setNotif2h] = useState(localStorage.getItem("wattly_notif_2h") !== "false");
+  const [notifNow, setNotifNow] = useState(localStorage.getItem("wattly_notif_now") !== "false");
+  const [notif30m, setNotif30m] = useState(localStorage.getItem("wattly_notif_30m") !== "false");
+  const [notifExpNow, setNotifExpNow] = useState(localStorage.getItem("wattly_notif_exp_now") !== "false");
+  const [cheapVal, setCheapVal] = useState(Number(localStorage.getItem("wattly_notif_cheap") || "5"));
+  const [expVal, setExpVal] = useState(Number(localStorage.getItem("wattly_notif_expensive") || "15"));
 
   const [name, setName] = useState(() => loadStr("wattly_userName", ""));
   const [pvCapacity, setPvCapacity] = useState(() => loadStr("wattly_pvCapacity", "8.5"));
