@@ -67,101 +67,65 @@ const SettingsView = () => {
       <h2 className="text-lg font-bold text-foreground">Einstellungen</h2>
 
       {/* Push Notifications */}
-      <section className="bg-gradient-card border border-border rounded-xl p-4 space-y-4">
-        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
-          <Bell className="w-4 h-4" /> Benachrichtigungen
-        </h3>
+      <section className="bg-gradient-card border border-border rounded-xl p-5 space-y-4">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center text-lg">🔔</div>
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Benachrichtigungen</h3>
+        </div>
 
         {permission === "default" && (
-          <Button
-            onClick={requestPermission}
-            className="w-full gap-2 bg-primary hover:bg-primary/90"
-          >
-            🔔 Benachrichtigungen aktivieren
-          </Button>
+          <div className="space-y-3">
+            <p className="text-sm text-muted-foreground">
+              Erhalte automatische Warnungen wenn Strom günstig oder teuer wird — 2 Stunden im Voraus!
+            </p>
+            <Button onClick={requestPermission} className="w-full gap-2 bg-primary hover:bg-primary/90">
+              🔔 Benachrichtigungen aktivieren
+            </Button>
+          </div>
         )}
 
         {permission === "granted" && (
           <div className="space-y-4">
             <div className="flex items-center gap-2 text-primary">
-              <CheckCircle2 className="w-5 h-5" />
+              <span className="text-lg">✅</span>
               <span className="text-sm font-medium">Benachrichtigungen aktiv</span>
             </div>
 
             <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-foreground">2h Vorwarnung bei günstigem Strom</span>
-                <Switch
-                  checked={notif2hCheap}
-                  onCheckedChange={(v) => toggleNotifPref("wattly_notif_2h_cheap", v, setNotif2hCheap)}
-                />
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-foreground">Sofort-Alert bei günstigem Strom</span>
-                <Switch
-                  checked={notifNowCheap}
-                  onCheckedChange={(v) => toggleNotifPref("wattly_notif_now_cheap", v, setNotifNowCheap)}
-                />
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-foreground">30min Warnung vor teurem Strom</span>
-                <Switch
-                  checked={notif30mExpensive}
-                  onCheckedChange={(v) => toggleNotifPref("wattly_notif_30m_expensive", v, setNotif30mExpensive)}
-                />
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-foreground">Sofort-Alert bei teurem Strom</span>
-                <Switch
-                  checked={notifNowExpensive}
-                  onCheckedChange={(v) => toggleNotifPref("wattly_notif_now_expensive", v, setNotifNowExpensive)}
-                />
-              </div>
+              {([
+                ["2h Vorwarnung bei günstigem Strom", notif2h, (v: boolean) => { setNotif2h(v); localStorage.setItem("wattly_notif_2h", String(v)); }],
+                ["Sofort-Alert bei günstigem Strom", notifNow, (v: boolean) => { setNotifNow(v); localStorage.setItem("wattly_notif_now", String(v)); }],
+                ["30min Warnung vor teurem Strom", notif30m, (v: boolean) => { setNotif30m(v); localStorage.setItem("wattly_notif_30m", String(v)); }],
+                ["Sofort-Alert bei teurem Strom", notifExpNow, (v: boolean) => { setNotifExpNow(v); localStorage.setItem("wattly_notif_exp_now", String(v)); }],
+              ] as [string, boolean, (v: boolean) => void][]).map(([label, value, onChange]) => (
+                <div key={label} className="flex items-center justify-between">
+                  <span className="text-sm text-foreground">{label}</span>
+                  <Switch checked={value} onCheckedChange={onChange} />
+                </div>
+              ))}
+            </div>
 
-              <div className="space-y-2 pt-2">
-                <Label className="text-xs text-muted-foreground">
-                  Günstig-Schwellwert: <span className="font-mono font-medium text-foreground">{cheapThreshold} ct/kWh</span>
-                </Label>
-                <Slider
-                  value={[cheapThreshold]}
-                  onValueChange={([v]) => {
-                    setCheapThreshold(v);
-                    localStorage.setItem("wattly_notif_cheap_threshold", String(v));
-                  }}
-                  min={1}
-                  max={10}
-                  step={1}
-                  className="w-full"
-                />
-              </div>
-
+            <div className="space-y-3 pt-2">
               <div className="space-y-2">
                 <Label className="text-xs text-muted-foreground">
-                  Teuer-Schwellwert: <span className="font-mono font-medium text-foreground">{expensiveThreshold} ct/kWh</span>
+                  Günstig unter <span className="font-mono font-medium text-foreground">{cheapVal} ct/kWh</span>
                 </Label>
-                <Slider
-                  value={[expensiveThreshold]}
-                  onValueChange={([v]) => {
-                    setExpensiveThreshold(v);
-                    localStorage.setItem("wattly_notif_expensive_threshold", String(v));
-                  }}
-                  min={10}
-                  max={30}
-                  step={1}
-                  className="w-full"
-                />
+                <Slider value={[cheapVal]} onValueChange={([v]) => { setCheapVal(v); localStorage.setItem("wattly_notif_cheap", String(v)); }} min={1} max={10} step={1} className="w-full" />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs text-muted-foreground">
+                  Teuer über <span className="font-mono font-medium text-foreground">{expVal} ct/kWh</span>
+                </Label>
+                <Slider value={[expVal]} onValueChange={([v]) => { setExpVal(v); localStorage.setItem("wattly_notif_expensive", String(v)); }} min={10} max={30} step={1} className="w-full" />
               </div>
             </div>
           </div>
         )}
 
         {permission === "denied" && (
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <BellOff className="w-5 h-5" />
-            <p className="text-sm">
-              Benachrichtigungen wurden blockiert. Bitte in den Browser-Einstellungen aktivieren.
-            </p>
-          </div>
+          <p className="text-sm text-muted-foreground">
+            Benachrichtigungen wurden blockiert. Bitte in den Browser-Einstellungen aktivieren und Seite neu laden.
+          </p>
         )}
       </section>
 
