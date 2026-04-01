@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sun, Battery, Car, Thermometer, Zap, ArrowRight, Check } from "lucide-react";
+import { Sun, Battery, Car, Thermometer, Zap, ArrowRight, Check, Smartphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -16,6 +16,12 @@ const DEVICE_OPTIONS = [
   { id: "battery", label: "Heimspeicher", icon: <Battery className="w-5 h-5" /> },
   { id: "ev", label: "E-Auto", icon: <Car className="w-5 h-5" /> },
   { id: "heatpump", label: "Wärmepumpe", icon: <Thermometer className="w-5 h-5" /> },
+];
+
+const BENEFITS = [
+  { emoji: "⚡", text: "Günstigster Strom heute: 02:00–05:00 Uhr" },
+  { emoji: "💰", text: "Durchschnittliche Ersparnis: 200–400 €/Jahr" },
+  { emoji: "📱", text: "Keine Registrierung · Kostenlos · Für Österreich" },
 ];
 
 const OnboardingOverlay = ({ onComplete }: OnboardingOverlayProps) => {
@@ -34,7 +40,6 @@ const OnboardingOverlay = ({ onComplete }: OnboardingOverlayProps) => {
 
   const deviceCount = Object.values(selectedDevices).filter(Boolean).length;
 
-  // Simple savings estimate
   const calcSavings = () => {
     let base = 180;
     if (selectedDevices.pv) base += 220;
@@ -57,6 +62,8 @@ const OnboardingOverlay = ({ onComplete }: OnboardingOverlayProps) => {
     onComplete(selectedDevices);
   };
 
+  const totalSteps = 4;
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -74,7 +81,7 @@ const OnboardingOverlay = ({ onComplete }: OnboardingOverlayProps) => {
       >
         {/* Progress dots */}
         <div className="flex items-center justify-center gap-2 mb-8">
-          {[0, 1, 2].map((i) => (
+          {Array.from({ length: totalSteps }, (_, i) => (
             <div
               key={i}
               className={`h-2 rounded-full transition-all duration-300 ${
@@ -84,7 +91,56 @@ const OnboardingOverlay = ({ onComplete }: OnboardingOverlayProps) => {
           ))}
         </div>
 
+        {/* Step 0 — Value Proposition */}
         {step === 0 && (
+          <div className="space-y-8">
+            <div className="text-center space-y-3">
+              <motion.div
+                initial={{ scale: 0, rotate: -20 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ type: "spring", duration: 0.6 }}
+                className="mx-auto w-16 h-16 rounded-2xl bg-primary/15 flex items-center justify-center"
+              >
+                <Zap className="w-9 h-9 text-primary" />
+              </motion.div>
+              <h1 className="text-3xl font-bold text-foreground tracking-tight">
+                Strom clever kaufen.
+              </h1>
+              <p className="text-base text-muted-foreground leading-relaxed max-w-xs mx-auto">
+                WATTLY sagt dir genau wann Strom günstig oder teuer ist — und wie viel du sparst.
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              {BENEFITS.map((b, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.2 + i * 0.15 }}
+                  className="flex items-center gap-4 p-4 rounded-xl bg-card border border-border"
+                >
+                  <span className="text-2xl flex-shrink-0">{b.emoji}</span>
+                  <span className="text-sm font-medium text-foreground">{b.text}</span>
+                </motion.div>
+              ))}
+            </div>
+
+            <div className="space-y-3">
+              <Button
+                className="w-full gap-2 h-12 text-base"
+                size="lg"
+                onClick={() => setStep(1)}
+              >
+                Zeig mir wie viel ich spare <ArrowRight className="w-5 h-5" />
+              </Button>
+              <p className="text-xs text-muted-foreground text-center">Dauert 1 Minute</p>
+            </div>
+          </div>
+        )}
+
+        {/* Step 1 — Device Selection */}
+        {step === 1 && (
           <div className="space-y-6">
             <div className="text-center space-y-2">
               <div className="mx-auto w-14 h-14 rounded-2xl bg-primary/15 flex items-center justify-center mb-4">
@@ -119,14 +175,15 @@ const OnboardingOverlay = ({ onComplete }: OnboardingOverlayProps) => {
             <Button
               className="w-full gap-2"
               size="lg"
-              onClick={() => setStep(1)}
+              onClick={() => setStep(2)}
             >
               Weiter <ArrowRight className="w-4 h-4" />
             </Button>
           </div>
         )}
 
-        {step === 1 && (
+        {/* Step 2 — Tariff */}
+        {step === 2 && (
           <div className="space-y-6">
             <div className="text-center space-y-2">
               <h2 className="text-2xl font-bold text-foreground">Dein Stromtarif</h2>
@@ -171,15 +228,16 @@ const OnboardingOverlay = ({ onComplete }: OnboardingOverlayProps) => {
               )}
             </AnimatePresence>
             <div className="flex gap-3">
-              <Button variant="outline" className="flex-1" onClick={() => setStep(0)}>Zurück</Button>
-              <Button className="flex-1 gap-2" onClick={() => setStep(2)}>
+              <Button variant="outline" className="flex-1" onClick={() => setStep(1)}>Zurück</Button>
+              <Button className="flex-1 gap-2" onClick={() => setStep(3)}>
                 Weiter <ArrowRight className="w-4 h-4" />
               </Button>
             </div>
           </div>
         )}
 
-        {step === 2 && (
+        {/* Step 3 — Savings Result */}
+        {step === 3 && (
           <div className="space-y-6">
             <div className="text-center space-y-2">
               <h2 className="text-2xl font-bold text-foreground">Dein Einsparpotenzial</h2>
@@ -198,7 +256,7 @@ const OnboardingOverlay = ({ onComplete }: OnboardingOverlayProps) => {
               </motion.div>
             </div>
             <div className="flex gap-3">
-              <Button variant="outline" className="flex-1" onClick={() => setStep(1)}>Zurück</Button>
+              <Button variant="outline" className="flex-1" onClick={() => setStep(2)}>Zurück</Button>
               <Button className="flex-1 gap-2" size="lg" onClick={finish}>
                 <Zap className="w-4 h-4" /> WATTLY starten
               </Button>
