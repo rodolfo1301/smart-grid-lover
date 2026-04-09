@@ -257,9 +257,63 @@ const OnboardingOverlay = ({ onComplete }: OnboardingOverlayProps) => {
             </div>
             <div className="flex gap-3">
               <Button variant="outline" className="flex-1" onClick={() => setStep(2)}>Zurück</Button>
-              <Button className="flex-1 gap-2" size="lg" onClick={finish}>
-                <Zap className="w-4 h-4" /> WATTLY starten
+              <Button className="flex-1 gap-2" size="lg" onClick={() => setStep(4)}>
+                <ArrowRight className="w-4 h-4" /> Weiter
               </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Step 4 — Notifications */}
+        {step === 4 && (
+          <div className="space-y-6">
+            <div className="text-center space-y-2">
+              <div className="mx-auto w-14 h-14 rounded-2xl bg-primary/15 flex items-center justify-center mb-4">
+                <Bell className="w-7 h-7 text-primary" />
+              </div>
+              <h2 className="text-2xl font-bold text-foreground">📱 Bleib immer informiert</h2>
+              <p className="text-sm text-muted-foreground leading-relaxed max-w-xs mx-auto">
+                WATTLY sendet dir eine Nachricht wenn Strom besonders günstig oder teuer ist — damit du nie eine Sparmöglichkeit verpasst.
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              {[
+                { emoji: "⚡", text: "Jetzt Waschen — spart 1,80 €" },
+                { emoji: "🔴", text: "Strom teuer bis 21:00 — Geräte aus" },
+              ].map((n, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.2 + i * 0.15 }}
+                  className="flex items-center gap-4 p-4 rounded-xl bg-card border border-border"
+                >
+                  <span className="text-2xl flex-shrink-0">{n.emoji}</span>
+                  <span className="text-sm font-medium text-foreground">{n.text}</span>
+                </motion.div>
+              ))}
+            </div>
+
+            <div className="space-y-3">
+              <Button
+                className="w-full gap-2 h-12 text-base"
+                size="lg"
+                onClick={async () => {
+                  if (typeof Notification !== "undefined") {
+                    await Notification.requestPermission();
+                  }
+                  finish();
+                }}
+              >
+                <Bell className="w-5 h-5" /> Ja, Benachrichtigungen aktivieren
+              </Button>
+              <button
+                onClick={finish}
+                className="w-full text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Nein danke, später aktivieren
+              </button>
             </div>
           </div>
         )}
