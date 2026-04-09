@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sun, Battery, Car, Thermometer, Zap, ArrowRight, Check, Smartphone } from "lucide-react";
+import { Sun, Battery, Car, Thermometer, Zap, ArrowRight, Check, Smartphone, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
