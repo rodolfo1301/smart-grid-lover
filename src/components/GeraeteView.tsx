@@ -4,6 +4,7 @@ import { Sun, Battery, Car, Thermometer, ChevronDown, Zap, Leaf } from "lucide-r
 import { Slider } from "@/components/ui/slider";
 import DeviceCard from "@/components/DeviceCard";
 import EnergyFlowDiagram from "@/components/EnergyFlowDiagram";
+import SmartmeterImport from "@/components/SmartmeterImport";
 
 interface DeviceStates {
   [key: string]: boolean;
@@ -38,6 +39,7 @@ const GeraeteView = ({ deviceStates, toggleDevice }: GeraeteViewProps) => {
       className="space-y-4"
     >
       <h2 className="text-lg font-bold text-foreground">Meine Geräte</h2>
+      <SmartmeterImport />
       <EnergyFlowDiagram />
       <div className="space-y-3">
         {devices.map((d, i) => (
