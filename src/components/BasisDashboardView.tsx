@@ -11,6 +11,7 @@ import { Progress } from "@/components/ui/progress";
 import PriceChart from "@/components/PriceChart";
 import SmartRecommendations from "@/components/SmartRecommendations";
 import SavingsCounter from "@/components/SavingsCounter";
+import SmartmeterImport from "@/components/SmartmeterImport";
 import { useMarketPrices } from "@/hooks/useMarketPrices";
 
 interface Appliance {
@@ -81,6 +82,7 @@ const BasisDashboardView = ({ onReOnboard }: BasisDashboardViewProps) => {
       transition={{ duration: 0.25 }}
       className="space-y-6"
     >
+      <SmartmeterImport />
       <SavingsCounter />
 
       {/* Mein Verbrauch */}
