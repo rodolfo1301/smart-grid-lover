@@ -62,7 +62,7 @@ const OnboardingOverlay = ({ onComplete }: OnboardingOverlayProps) => {
     onComplete(selectedDevices);
   };
 
-  const totalSteps = 4;
+  const totalSteps = 5;
 
   return (
     <motion.div
