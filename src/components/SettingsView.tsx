@@ -8,6 +8,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Slider } from "@/components/ui/slider";
 import { Trash2 } from "lucide-react";
 import { useNotifications } from "@/hooks/useNotifications";
+import EmailSignup from "@/components/EmailSignup";
 
 const loadStr = (key: string, fallback: string) => localStorage.getItem(key) ?? fallback;
 const loadBool = (key: string, fallback: boolean) => {
@@ -128,6 +129,9 @@ const SettingsView = () => {
           </p>
         )}
       </section>
+
+      {/* Email Alerts */}
+      <EmailSignup />
 
       {/* Mein Tarif */}
       <section className="bg-gradient-card border border-border rounded-xl p-4 space-y-4">
