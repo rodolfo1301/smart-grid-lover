@@ -23,6 +23,26 @@ const CustomTooltip = ({ active, payload }: any) => {
   );
 };
 
+const renderCustomTick = (currentTime: string | undefined) => (props: any) => {
+  const { x, y, payload } = props;
+  const isCurrent = payload.value === currentTime;
+  if (isCurrent) {
+    return (
+      <g transform={`translate(${x},${y})`}>
+        <rect x="-18" y="2" width="36" height="16" rx="8" fill="hsl(155, 80%, 45%)" />
+        <text x="0" y="14" textAnchor="middle" fill="white" fontSize={10} fontWeight="500">
+          Jetzt
+        </text>
+      </g>
+    );
+  }
+  return (
+    <text x={x} y={y} dy={10} textAnchor="middle" fill="hsl(215, 15%, 55%)" fontSize={11}>
+      {payload.value}
+    </text>
+  );
+};
+
 const PriceChart = () => {
   const { data, isLoading, isError, refetch } = useMarketPrices();
 
@@ -34,6 +54,7 @@ const PriceChart = () => {
     const next = data[i + 1];
     return d.timestamp <= now && (!next || next.timestamp > now);
   });
+  const currentTime = currentIdx !== undefined && currentIdx >= 0 && data ? data[currentIdx].time : undefined;
 
   return (
     <motion.div
@@ -96,7 +117,7 @@ const PriceChart = () => {
                 dataKey="time"
                 axisLine={false}
                 tickLine={false}
-                tick={{ fill: "hsl(215, 15%, 55%)", fontSize: 11 }}
+                tick={renderCustomTick(currentTime)}
                 interval={Math.max(0, Math.floor((data.length - 1) / 8))}
               />
               <YAxis
@@ -115,9 +136,10 @@ const PriceChart = () => {
               {currentIdx !== undefined && currentIdx >= 0 && (
                 <ReferenceLine
                   x={data[currentIdx].time}
-                  stroke="hsl(155, 80%, 45%)"
+                  stroke="#EF9F27"
+                  strokeDasharray="4 4"
                   strokeWidth={2}
-                  label={{ value: "Jetzt", fill: "hsl(155, 80%, 45%)", fontSize: 10, position: "top" }}
+                  label={{ value: "Jetzt", fill: "#EF9F27", fontSize: 10, position: "top" }}
                 />
               )}
               <Area
