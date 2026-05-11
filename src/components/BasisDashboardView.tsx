@@ -12,6 +12,7 @@ import PriceChart from "@/components/PriceChart";
 import SmartRecommendations from "@/components/SmartRecommendations";
 import SavingsCounter from "@/components/SavingsCounter";
 import SmartmeterImport from "@/components/SmartmeterImport";
+import EmailSignup from "@/components/EmailSignup";
 import { useMarketPrices } from "@/hooks/useMarketPrices";
 
 interface Appliance {
@@ -44,6 +45,7 @@ const BasisDashboardView = ({ onReOnboard }: BasisDashboardViewProps) => {
     } catch { return {}; }
   });
   const [monthlyKwh, setMonthlyKwh] = useState(() => localStorage.getItem("wattly_monthlyKwh") || "350");
+  const [emailDismissed, setEmailDismissed] = useState(() => localStorage.getItem("wattly_email_dismissed") === "true");
 
   const toggleAppliance = (id: string) => {
     setApplianceStates((prev) => {
@@ -151,6 +153,11 @@ const BasisDashboardView = ({ onReOnboard }: BasisDashboardViewProps) => {
       </section>
 
       <SmartRecommendations />
+
+      {/* Email Alerts */}
+      {!emailDismissed && (
+        <EmailSignup onDismiss={() => { localStorage.setItem("wattly_email_dismissed", "true"); setEmailDismissed(true); }} />
+      )}
 
       {/* Upgrade Banner */}
       <section className="rounded-xl border-2 border-dashed border-primary/40 bg-primary/5 p-5 text-center space-y-3">
