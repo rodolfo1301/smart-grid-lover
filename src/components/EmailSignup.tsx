@@ -4,6 +4,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
+import { supabase } from "@/lib/supabase";
+
+// Note: Run this in Supabase SQL editor:
+// CREATE POLICY "Anyone can sign up" ON email_signups
+// FOR INSERT WITH CHECK (true);
 
 interface EmailSignupProps {
   onDismiss?: () => void;
@@ -20,13 +25,29 @@ const EmailSignup = ({ onDismiss }: EmailSignupProps) => {
   const [email, setEmail] = useState(localStorage.getItem("wattly_email") || "");
   const [threshold, setThreshold] = useState(localStorage.getItem("wattly_alert_threshold") || "5");
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.includes("@")) return;
-    localStorage.setItem("wattly_email", email);
-    localStorage.setItem("wattly_alert_threshold", threshold);
-    setSubmitted(true);
+    setLoading(true);
+    setError("");
+    try {
+      const { error: dbError } = await supabase
+        .from("email_signups")
+        .insert([{ email, threshold }]);
+
+      if (dbError) throw dbError;
+
+      setSubmitted(true);
+      localStorage.setItem("wattly_email", email);
+      localStorage.setItem("wattly_alert_threshold", threshold);
+    } catch (err) {
+      setError("Email konnte nicht gespeichert werden. Bitte versuche es nochmal.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (submitted) {
@@ -92,8 +113,12 @@ const EmailSignup = ({ onDismiss }: EmailSignupProps) => {
           </select>
         </div>
 
-        <Button type="submit" className="w-full bg-primary hover:bg-primary/90">
-          Alerts aktivieren
+        {error && (
+          <p className="text-sm text-destructive">{error}</p>
+        )}
+
+        <Button type="submit" disabled={loading} className="w-full bg-primary hover:bg-primary/90">
+          {loading ? "Wird gespeichert..." : submitted ? "✅ Eingetragen!" : "Alerts aktivieren"}
         </Button>
       </form>
 
