@@ -6,6 +6,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { useMarketPrices, getTodayPrices, findPriceWindow, shiftSavingEur, formatEur } from "@/hooks/useMarketPrices";
+
+const SHIFT_KWH_PER_DAY = 3; // assumption for the savings estimate
 
 interface OnboardingOverlayProps {
   onComplete: (devices: Record<string, boolean>) => void;
@@ -18,11 +21,6 @@ const DEVICE_OPTIONS = [
   { id: "heatpump", label: "Wärmepumpe", icon: <Thermometer className="w-5 h-5" /> },
 ];
 
-const BENEFITS = [
-  { emoji: "⚡", text: "Günstigster Strom heute: 02:00–05:00 Uhr" },
-  { emoji: "💰", text: "Durchschnittliche Ersparnis: 200–400 €/Jahr" },
-  { emoji: "📱", text: "Keine Registrierung · Kostenlos · Für Österreich" },
-];
 
 const OnboardingOverlay = ({ onComplete }: OnboardingOverlayProps) => {
   const [step, setStep] = useState(0);
@@ -40,18 +38,17 @@ const OnboardingOverlay = ({ onComplete }: OnboardingOverlayProps) => {
 
   const deviceCount = Object.values(selectedDevices).filter(Boolean).length;
 
-  const calcSavings = () => {
-    let base = 180;
-    if (selectedDevices.pv) base += 220;
-    if (selectedDevices.battery) base += 140;
-    if (selectedDevices.ev) base += 160;
-    if (selectedDevices.heatpump) base += 110;
-    if (tariff === "fixed") {
-      const p = parseFloat(fixedPrice) || 30;
-      base += Math.max(0, (p - 20) * 8);
-    }
-    return Math.round(base);
-  };
+  const { data: prices } = useMarketPrices();
+  const today = prices ? getTodayPrices(prices) : [];
+  const cheapWin = findPriceWindow(today, 3, "cheapest");
+  const expWin = findPriceWindow(today, 3, "expensive");
+  const dailySaving = cheapWin && expWin ? shiftSavingEur(expWin.avgPrice, cheapWin.avgPrice, SHIFT_KWH_PER_DAY) : null;
+
+  const BENEFITS = [
+    { emoji: "⚡", text: `Günstigster Strom heute: ${cheapWin ? `${cheapWin.startTime}–${cheapWin.endTime} Uhr` : "wird geladen…"}` },
+    { emoji: "💰", text: "Lohnt sich besonders mit dynamischem Stromtarif" },
+    { emoji: "📱", text: "Keine Registrierung · Kostenlos · Für Österreich" },
+  ];
 
   const finish = () => {
     localStorage.setItem("wattly_onboarded", "true");
@@ -241,7 +238,7 @@ const OnboardingOverlay = ({ onComplete }: OnboardingOverlayProps) => {
           <div className="space-y-6">
             <div className="text-center space-y-2">
               <h2 className="text-2xl font-bold text-foreground">Dein Einsparpotenzial</h2>
-              <p className="text-sm text-muted-foreground">Basierend auf deinen Angaben</p>
+              <p className="text-sm text-muted-foreground">Basierend auf den heutigen Börsenpreisen</p>
             </div>
             <div className="text-center py-8">
               <motion.div
@@ -249,10 +246,19 @@ const OnboardingOverlay = ({ onComplete }: OnboardingOverlayProps) => {
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ type: "spring", duration: 0.6 }}
               >
-                <p className="text-6xl font-bold text-primary font-mono-numbers">
-                  ~{calcSavings()}&nbsp;€
-                </p>
-                <p className="text-lg text-muted-foreground mt-2">pro Jahr Einsparpotenzial</p>
+                {dailySaving !== null && cheapWin && expWin ? (
+                  <>
+                    <p className="text-6xl font-bold text-primary font-mono-numbers">
+                      ~{formatEur(dailySaving)}&nbsp;€
+                    </p>
+                    <p className="text-lg text-muted-foreground mt-2">heute möglich</p>
+                    <p className="text-xs text-muted-foreground mt-3 max-w-xs mx-auto">
+                      geschätzt, bei dynamischem Tarif · {SHIFT_KWH_PER_DAY} kWh von {expWin.startTime} auf {cheapWin.startTime} Uhr verschoben · ohne Netzgebühren und Steuern
+                    </p>
+                  </>
+                ) : (
+                  <p className="text-sm text-muted-foreground">Börsenpreise derzeit nicht verfügbar</p>
+                )}
               </motion.div>
             </div>
             <div className="flex gap-3">
@@ -278,6 +284,7 @@ const OnboardingOverlay = ({ onComplete }: OnboardingOverlayProps) => {
             </div>
 
             <div className="space-y-3">
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground text-center">Beispiel-Benachrichtigungen</p>
               {[
                 { emoji: "⚡", text: "Jetzt Waschen — spart 1,80 €" },
                 { emoji: "🔴", text: "Strom teuer bis 21:00 — Geräte aus" },

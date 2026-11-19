@@ -4,9 +4,9 @@ import { X, ExternalLink, Calculator } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useMarketPrices, getTodayPrices } from "@/hooks/useMarketPrices";
 
 const STORAGE_KEY = "wattly_tariff_dismissed";
-const AVG_AWATTAR_PRICE = 8.5;
 
 const TariffSwitchBanner = () => {
   const [dismissed, setDismissed] = useState(() => localStorage.getItem(STORAGE_KEY) === "true");
@@ -18,6 +18,10 @@ const TariffSwitchBanner = () => {
     localStorage.getItem("wattly_fixed_price") || "28"
   );
   const [savings, setSavings] = useState(0);
+  const { data } = useMarketPrices();
+  const today = data ? getTodayPrices(data) : [];
+  const totalMin = today.reduce((s, d) => s + d.intervalMinutes, 0);
+  const avgSpot = totalMin ? today.reduce((s, d) => s + d.price * d.intervalMinutes, 0) / totalMin : null;
 
   if (dismissed) return null;
 
@@ -31,7 +35,8 @@ const TariffSwitchBanner = () => {
     const p = parseFloat(fixedPrice) || 28;
     localStorage.setItem("wattly_yearly_consumption", String(c));
     localStorage.setItem("wattly_fixed_price", String(p));
-    const result = ((p - AVG_AWATTAR_PRICE) / 100) * c;
+    if (avgSpot === null) return;
+    const result = ((p - avgSpot) / 100) * c;
     setSavings(Math.max(0, Math.round(result)));
     setStep(2);
   };
@@ -96,10 +101,13 @@ const TariffSwitchBanner = () => {
                 </div>
               </div>
 
-              <Button onClick={calculate} className="w-full gap-2">
+              <Button onClick={calculate} className="w-full gap-2" disabled={avgSpot === null}>
                 <Calculator className="w-4 h-4" />
                 Berechnen
               </Button>
+              {avgSpot === null && (
+                <p className="text-xs text-muted-foreground">Börsenpreise derzeit nicht verfügbar</p>
+              )}
             </motion.div>
           ) : (
             <motion.div
@@ -114,10 +122,11 @@ const TariffSwitchBanner = () => {
                   ~{savings}&nbsp;€/Jahr
                 </p>
                 <p className="text-sm font-medium text-foreground">
-                  Geschätzte Ersparnis mit dynamischem Tarif
+                  Grobe Schätzung, bei dynamischem Tarif
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  Basierend auf deinem Verbrauch und dem Ø&nbsp;aWATTar-Preis 2024 von 8,5&nbsp;ct/kWh
+                  Annahme: {consumption}&nbsp;kWh/Jahr zum heutigen Ø-Börsenpreis von {avgSpot?.toFixed(1).replace(".", ",")}&nbsp;ct/kWh.
+                  Netzgebühren, Steuern und Anbieter-Aufschläge sind nicht eingerechnet – die tatsächliche Ersparnis ist geringer und schwankt täglich.
                 </p>
               </div>
 

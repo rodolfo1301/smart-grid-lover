@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Zap } from "lucide-react";
-import { useMarketPrices } from "@/hooks/useMarketPrices";
+import { useMarketPrices, getTodayPrices, getUpcomingPrices, getLowestPrice, getHighestPrice, getCurrentPrice, shiftSavingEur, formatEur } from "@/hooks/useMarketPrices";
 
 interface AutoOptimizationToggleProps {
   enabled: boolean;
@@ -12,29 +12,21 @@ interface AutoOptimizationToggleProps {
 
 const AutoOptimizationToggle = ({ enabled, onToggle }: AutoOptimizationToggleProps) => {
   const { data: prices } = useMarketPrices();
+  const SHIFT_KWH = 3; // assumption: shiftable consumption per day
 
-  const { savingsToday, isCheapNow } = useMemo(() => {
-    if (!prices?.length) return { savingsToday: 0, isCheapNow: false };
-
-    const now = Date.now();
-    const avgPrice = 18; // ct/kWh reference
-    const kwhPerHour = 0.5;
-    let savings = 0;
-    let cheapNow = false;
-
-    prices.forEach((slot: any) => {
-      const start = slot.start_timestamp;
-      const end = slot.end_timestamp;
-      const price = slot.marketprice / 10; // €/MWh → ct/kWh
-      if (end > now && price < avgPrice) {
-        const diff = ((avgPrice - price) / 100) * kwhPerHour;
-        savings += diff;
-        if (start <= now && end > now) cheapNow = true;
-      }
-    });
-
-    return { savingsToday: Math.max(0, parseFloat(savings.toFixed(2))), isCheapNow: cheapNow };
+  const est = useMemo(() => {
+    if (!prices?.length) return null;
+    const upcoming = getUpcomingPrices(getTodayPrices(prices));
+    const lo = getLowestPrice(upcoming);
+    const hi = getHighestPrice(upcoming);
+    const current = getCurrentPrice(prices);
+    if (!lo || !hi) return null;
+    return {
+      saving: shiftSavingEur(hi.price, lo.price, SHIFT_KWH),
+      isCheapNow: current?.recommendation === "laden",
+    };
   }, [prices]);
+  const isCheapNow = est?.isCheapNow ?? false;
 
   return (
     <motion.div
@@ -68,14 +60,23 @@ const AutoOptimizationToggle = ({ enabled, onToggle }: AutoOptimizationTogglePro
               </div>
             </div>
 
-            <p className="text-2xl font-bold text-foreground tracking-tight">
-              Du sparst heute ~{savingsToday.toFixed(2).replace(".", ",")} €
-            </p>
+            {est ? (
+              <>
+                <p className="text-2xl font-bold text-foreground tracking-tight">
+                  Sparpotenzial heute ~{formatEur(est.saving)} €
+                </p>
+                <p className="text-[10px] text-muted-foreground">
+                  geschätzt, bei dynamischem Tarif · teuerste vs. günstigste restliche Stunde heute · Annahme: {SHIFT_KWH} kWh verschoben
+                </p>
+              </>
+            ) : (
+              <p className="text-sm text-muted-foreground">Börsenpreise derzeit nicht verfügbar</p>
+            )}
 
             <p className="text-xs text-muted-foreground leading-relaxed">
               {isCheapNow
                 ? "Strom jetzt günstig — idealer Zeitpunkt für Waschmaschine oder Geschirrspüler"
-                : "WATTLY optimiert deinen Verbrauch automatisch anhand der Börsenstrompreise"}
+                : "Verschiebe flexible Verbraucher in die günstigsten Stunden des Tages"}
             </p>
           </div>
 

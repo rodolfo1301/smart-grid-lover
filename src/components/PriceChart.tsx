@@ -1,6 +1,6 @@
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
 import { motion } from "framer-motion";
-import { useMarketPrices, type PriceDataPoint } from "@/hooks/useMarketPrices";
+import { useMarketPrices, getCurrentPrice, PRICES_UNAVAILABLE_TEXT, type PriceDataPoint } from "@/hooks/useMarketPrices";
 import { Loader2, AlertCircle, RefreshCw } from "lucide-react";
 
 const CustomTooltip = ({ active, payload }: any) => {
@@ -49,12 +49,19 @@ const PriceChart = () => {
   const avgPrice = data ? data.reduce((s, d) => s + d.price, 0) / data.length : 0;
 
   // Highlight current hour
-  const now = Date.now();
-  const currentIdx = data?.findIndex((d, i) => {
-    const next = data[i + 1];
-    return d.timestamp <= now && (!next || next.timestamp > now);
-  });
-  const currentTime = currentIdx !== undefined && currentIdx >= 0 && data ? data[currentIdx].time : undefined;
+  const currentPoint = data ? getCurrentPrice(data) : undefined;
+  const currentIdx = data && currentPoint ? data.indexOf(currentPoint) : -1;
+  const currentTime = currentPoint?.time;
+
+  // Only label full hours (works for 15-min and hourly data), every 3rd hour + current slot
+  const ticks = data
+    ? data
+        .filter((d) => {
+          const dt = new Date(d.timestamp);
+          return (dt.getMinutes() === 0 && dt.getHours() % 3 === 0) || d === currentPoint;
+        })
+        .map((d) => d.time)
+    : undefined;
 
   return (
     <motion.div
@@ -98,7 +105,7 @@ const PriceChart = () => {
       {isError && (
         <div className="h-64 flex flex-col items-center justify-center gap-2">
           <AlertCircle className="w-6 h-6 text-destructive" />
-          <span className="text-sm text-muted-foreground">Preisdaten konnten nicht geladen werden</span>
+          <span className="text-sm text-muted-foreground">{PRICES_UNAVAILABLE_TEXT}</span>
           <button onClick={() => refetch()} className="text-xs text-primary hover:underline">Erneut versuchen</button>
         </div>
       )}
@@ -118,7 +125,8 @@ const PriceChart = () => {
                 axisLine={false}
                 tickLine={false}
                 tick={renderCustomTick(currentTime)}
-                interval={Math.max(0, Math.floor((data.length - 1) / 8))}
+                ticks={ticks}
+                interval={0}
               />
               <YAxis
                 axisLine={false}
@@ -133,7 +141,7 @@ const PriceChart = () => {
                 strokeDasharray="4 4"
                 label={{ value: `Ø ${avgPrice.toFixed(1)}`, fill: "hsl(215, 15%, 55%)", fontSize: 10 }}
               />
-              {currentIdx !== undefined && currentIdx >= 0 && (
+              {currentIdx >= 0 && (
                 <ReferenceLine
                   x={data[currentIdx].time}
                   stroke="#EF9F27"
