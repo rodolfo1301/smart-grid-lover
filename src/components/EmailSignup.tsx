@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { X } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { CONTACT_EMAIL } from "@/lib/config";
 
 // Note: Run this in Supabase SQL editor:
 // CREATE POLICY "Anyone can sign up" ON email_signups
@@ -14,6 +15,7 @@ interface EmailSignupProps {
 const EmailSignup = ({ onDismiss }: EmailSignupProps) => {
   const [email, setEmail] = useState(localStorage.getItem("wattly_email") || "");
   const [threshold, setThreshold] = useState(localStorage.getItem("wattly_alert_threshold") || "5");
+  const [consent, setConsent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(!!localStorage.getItem("wattly_email"));
   const [error, setError] = useState("");
@@ -22,6 +24,10 @@ const EmailSignup = ({ onDismiss }: EmailSignupProps) => {
     e?.preventDefault();
     if (!email || !email.includes("@")) {
       setError("Bitte gib eine gültige Email-Adresse ein.");
+      return;
+    }
+    if (!consent) {
+      setError("Bitte bestätige die Einwilligung.");
       return;
     }
     setLoading(true);
@@ -35,7 +41,8 @@ const EmailSignup = ({ onDismiss }: EmailSignupProps) => {
       localStorage.setItem("wattly_alert_threshold", threshold);
       setSuccess(true);
     } catch (err) {
-      setError("Fehler beim Speichern. Bitte versuche es nochmal.");
+      console.error("Email signup failed:", err);
+      setError("Eintragen gerade nicht möglich. Bitte später nochmal versuchen.");
     } finally {
       setLoading(false);
     }
@@ -58,22 +65,27 @@ const EmailSignup = ({ onDismiss }: EmailSignupProps) => {
         )}
         <div className="flex items-center gap-2">
           <span className="text-xl">✅</span>
-          <h3 className="text-base font-bold text-foreground">Email-Alerts aktiviert!</h3>
+          <h3 className="text-base font-bold text-foreground">Du stehst auf der Warteliste</h3>
         </div>
         <p className="text-sm text-muted-foreground">
-          Du bekommst eine Nachricht an{" "}
-          <span className="font-medium text-foreground">{email}</span>{" "}
-          wenn Strom unter {threshold} ct/kWh fällt.
+          Wir melden uns an{" "}
+          <span className="font-medium text-foreground">{email}</span>,{" "}
+          sobald die Preis-Alerts starten. Gewünschte Schwelle: {threshold} ct/kWh.
         </p>
-        <button
-          onClick={() => {
-            setSuccess(false);
-            localStorage.removeItem("wattly_email");
-          }}
-          className="text-xs text-muted-foreground underline mt-3 block"
-        >
-          Abmelden
-        </button>
+        <p className="text-xs text-muted-foreground mt-3">
+          Löschung deiner Adresse jederzeit{" "}
+          {CONTACT_EMAIL ? (
+            <>
+              auf Anfrage an{" "}
+              <a href={`mailto:${CONTACT_EMAIL}`} className="underline">
+                {CONTACT_EMAIL}
+              </a>
+            </>
+          ) : (
+            "auf Anfrage"
+          )}
+          .
+        </p>
       </motion.div>
     );
   }
@@ -94,9 +106,9 @@ const EmailSignup = ({ onDismiss }: EmailSignupProps) => {
       )}
 
       <div>
-        <h3 className="text-base font-bold text-foreground">📧 Preis-Alerts per Email</h3>
+        <h3 className="text-base font-bold text-foreground">📧 Preis-Alerts – Warteliste</h3>
         <p className="text-sm text-muted-foreground mt-1">
-          Bekomme eine Email wenn Strom besonders günstig wird — funktioniert auf jedem Handy, auch iPhone.
+          E-Mail-Alerts sind in Vorbereitung. Trag dich ein und wir informieren dich, sobald sie starten.
         </p>
       </div>
 
@@ -120,18 +132,31 @@ const EmailSignup = ({ onDismiss }: EmailSignupProps) => {
           <option value="15">über 15 ct/kWh (teuer — warnen)</option>
         </select>
 
+        <label className="flex items-start gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={consent}
+            onChange={(e) => setConsent(e.target.checked)}
+            className="mt-0.5 accent-primary"
+          />
+          <span className="text-xs text-muted-foreground">
+            Ich willige ein, dass WATTLY meine E-Mail-Adresse speichert, um mich über den Start der
+            Preis-Alerts zu informieren. Die Einwilligung kann ich jederzeit widerrufen.
+          </span>
+        </label>
+
         {error && <p className="text-sm text-destructive">{error}</p>}
 
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || !consent}
           className="w-full px-4 py-2 rounded-lg bg-primary text-primary-foreground font-medium text-sm hover:bg-primary/90 transition-colors disabled:opacity-50"
         >
-          {loading ? "Wird gespeichert..." : "⚡ Alerts aktivieren"}
+          {loading ? "Wird gespeichert..." : "⚡ Auf Warteliste eintragen"}
         </button>
 
         <p className="text-xs text-muted-foreground text-center">
-          Kein Spam · Jederzeit abmeldbar · Kostenlos
+          Kein Spam · Kostenlos
         </p>
       </form>
     </motion.div>
